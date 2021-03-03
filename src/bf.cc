@@ -52,17 +52,17 @@ namespace bf {
         break; 
       }
       switch (stream_word) {
-        case '<': env.program_instruction.push_back(stream_word); break;
-        case '>': env.program_instruction.push_back(stream_word); break;
-        case '+': env.program_instruction.push_back(stream_word); break;
-        case '-': env.program_instruction.push_back(stream_word); break;
-        case ',': env.program_instruction.push_back(stream_word); break; 
-        case '.': env.program_instruction.push_back(stream_word); break;
-        case '[':
+        case BF_CELL_SHIFT_BACK: env.program_instruction.push_back(stream_word); break;
+        case BF_CELL_SHIFT_FRONT: env.program_instruction.push_back(stream_word); break;
+        case BF_INCREMENT_VALUE: env.program_instruction.push_back(stream_word); break;
+        case BF_DECREMENT_VALUE: env.program_instruction.push_back(stream_word); break;
+        case BF_READ_STDIN_BUFFER: env.program_instruction.push_back(stream_word); break; 
+        case BF_SHOW_STDOUT_BUFFER: env.program_instruction.push_back(stream_word); break;
+        case BF_LOOP_BEGIN:
           bracks++; 
           env.program_instruction.push_back(stream_word);
           break;
-        case ']':
+        case BF_LOOP_END:
           bracks--;
           env.program_instruction.push_back(stream_word); 
           break;
@@ -78,7 +78,7 @@ namespace bf {
   template <typename BFBytes, typename BFStream, typename BFType>
   void Stream<BFBytes, BFStream, BFType>::output_bf_stream(BFType printablechar_) {
     isprint(printablechar_) ? std::cout << printablechar_
-      : std::cout << "0x" << std::hex << static_cast<bfint_t> (printablechar_) << std::dec;
+      : std::cout << std::dec << static_cast<bfint_t> (printablechar_);
   }
   
   void Parser::get_loop_closer(Environment& env) {
@@ -103,38 +103,59 @@ namespace bf {
     env.bf_instruction_pointer = env.program_instruction.begin(); 
     while (env.bf_instruction_pointer != env.program_instruction.end()) {
       switch (*env.bf_instruction_pointer) {
-        case '+': (*env.bf_memory_pointer)++; env.bf_instruction_pointer++; break; 
-        case '-': (*env.bf_memory_pointer)--; env.bf_instruction_pointer++; break;
-        case '>': 
+        case BF_INCREMENT_VALUE: (*env.bf_memory_pointer)++; env.bf_instruction_pointer++; break; 
+        case BF_DECREMENT_VALUE: (*env.bf_memory_pointer)--; env.bf_instruction_pointer++; break;
+        case BF_CELL_SHIFT_FRONT: 
                 if (env.bf_memory_pointer != (env.program_memory.end()--)) {
                   env.bf_memory_pointer++;
                 }
                 env.bf_instruction_pointer++; 
                 break;
-        case '<':
+        case BF_CELL_SHIFT_BACK:
                 if (env.bf_memory_pointer != env.program_memory.begin()) {
                    env.bf_memory_pointer--;
                 } 
                 env.bf_instruction_pointer++; 
                 break; 
-        case '.': output_bf_stream(*env.bf_memory_pointer); env.bf_instruction_pointer++; break;
-        case ',': 
+        case BF_SHOW_STDOUT_BUFFER: output_bf_stream(*env.bf_memory_pointer); env.bf_instruction_pointer++; break;
+        case BF_READ_STDIN_BUFFER: 
                 bf_word input_word; std::cin >> input_word; 
                 (*env.bf_memory_pointer) = input_word; 
                 env.bf_instruction_pointer++; 
                 break; 
-        case '[':
+        case BF_LOOP_BEGIN:
                 if (!(*env.bf_memory_pointer))
                   get_loop_closer(env);
                 env.bf_instruction_pointer++;
                 break;
-        case ']':
+        case BF_LOOP_END:
                get_loop_opener(env); env.bf_instruction_pointer++; break;
         case bf::nullchar: env.bf_instruction_pointer++; break;  
       }     
 
     }
   }
+
+  bool User::load_interactive_interpreter(Environment& env) {
+    while (bf::bfuck_should_succeed<bool>(true, true)) {
+      std::getline(std::cin, interpreter_prompt);
+      if (!std::cin) {
+        throw "(error): broken input stream\n";
+        break;
+      } 
+      if (temp_bracks == BF_SUCCESS_CODE_STANDARD) { env.wipe_instruction_buffer(true);  }
+      BF_SET_VALUE(temp_bracks, entry_point_line(env, interpreter_prompt, temp_bracks));
+      if (temp_bracks == BF_SUCCESS_CODE_STANDARD) {
+        interpret_bf_instructions(env); 
+        output_bf_stream(*env.bf_memory_pointer); 
+        BF_FLUSH(std::endl); 
+      } else {
+          std::cout << "...>>>";
+      }
+    }
+    return true;  
+  }
+
   
 } // namespace: bf
 
@@ -145,7 +166,9 @@ int main(int argc, char** argv) {
   bf::Parser parser; 
 
   if (argc == BF_SUCCESS_CODE_STANDARD + 1) {
-    throw bf::exp::BFException("(error): no brainfuck files provided\n");
+    bf::User usr;
+    std::cout << "The Brainfuck Interactive Console Interpreter\n\t\tJosh Schiavone\n"; 
+    usr.load_interactive_interpreter(env);
   } else {
       std::ifstream stream = std::ifstream(argv[1]); 
       if (stream.is_open()) {

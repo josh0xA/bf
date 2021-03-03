@@ -37,6 +37,37 @@ SOFTWARE.
 #define BF_ERROR_CODE_STANDARD -1 
 
 #define BF_SET_VALUE(s_value, k_value) ((s_value) = (k_value))
+#define BF_FLUSH(ENDSTREAM) (std::cout << ENDSTREAM) 
+
+/*
+ *Brainfuck instructions
+ *as predefs
+*/
+#define BF_INCREMENT_VALUE '+'
+#define BF_DECREMENT_VALUE '-'
+#define BF_CELL_SHIFT_BACK '<'
+#define BF_CELL_SHIFT_FRONT '>'
+#define BF_READ_STDIN_BUFFER ','
+#define BF_SHOW_STDOUT_BUFFER '.'
+#define BF_LOOP_BEGIN '['
+#define BF_LOOP_END ']' 
+#define BF_RESET '\0'
+
+/*
+ * Brainfuck instructions as
+ * opcode
+*/
+
+#define OPCODE_MOVE_FRONT 1
+#define OPCODE_MOVE_BACK 2
+#define OPCODE_INCREMENT 3
+#define OPCODE_DECREMENT 4
+#define OPCODE_READ_STDIN_BUFFER 5
+#define OPCODE_SHOW_STDOUT_BUFFER 6
+#define OPCODE_LOOP_BEGIN 7
+#define OPCODE_LOOP_END 8
+#define OPCODE_RESET 9
+
 
 typedef char bf_word; 
 typedef uint32_t bf32_int; 
@@ -45,7 +76,7 @@ typedef int bfint_t;
 namespace bf {
 
   constexpr bf_word nullchar = '\0'; 
-  const bfint_t max_memory_size = 18000;
+  const bfint_t max_memory_size = 30000; // tape
 
   template <typename RType>
   RType bfuck_should_succeed(RType successor, RType successor_value) {
@@ -80,6 +111,14 @@ namespace bf {
   private:
     void get_loop_closer(Environment& env); 
     void get_loop_opener(Environment& env);  
+  };
+
+  class User : protected Parser {
+  public:
+    bool load_interactive_interpreter(Environment& env); 
+  private:
+    bfint_t temp_bracks = BF_SUCCESS_CODE_STANDARD;
+    std::string interpreter_prompt; 
   };
 
   namespace exp {
