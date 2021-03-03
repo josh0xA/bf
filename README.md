@@ -7,7 +7,7 @@ Why did I make an interpreter for The Brainfuck Programming Language? Learning m
 a) ``git clone https://github.com/josh0xA/bf.git``<br/>
 b) ``cd bf``<br/>
 c) ``make``<br/>
-d) ``./bf HelloWorld.bf``<br/>
+d) ``./bf brainfuck_programs/HelloWorld.bf``<br/>
 
 ## Brainfuck-C Table
 
