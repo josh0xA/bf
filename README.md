@@ -1,7 +1,7 @@
 # bf - A Simplistic Interpreter For The Brainfuck Programming Language (beta)
 
 ## Description
-Why did I make an interpreter for The Brainfuck Programming Language? Learning more about esoteric programming languages, decided to write an interpreter due to ease-of-task because of the minimalist instruction set. This project is just for fun. 
+Why did I make an interpreter for The Brainfuck Programming Language? Pretty much no reason at all to be honest, learning more about esoteric programming languages, so I decided to write an interpreter due to ease-of-task because of the minimalist instruction set. This project is just for fun. 
 
 ## Installation 
 a) ``git clone https://github.com/josh0xA/bf.git``<br/>
