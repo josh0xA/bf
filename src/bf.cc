@@ -145,6 +145,7 @@ namespace bf {
 
   bool User::load_interactive_interpreter(Environment& env) {
     while (bf::bfuck_should_succeed<bool>(true, true)) {
+      std::cout << ": ";
       std::getline(std::cin, interpreter_prompt);
       if (!std::cin) {
         throw "(error): broken input stream\n";
@@ -157,7 +158,7 @@ namespace bf {
         output_bf_stream(*env.bf_memory_pointer);
         BF_FLUSH(std::endl);
       } else {
-          std::cout << "...>>>";
+          std::cout << "... ";
       }
     }
     return true;
