@@ -148,7 +148,7 @@ namespace bf {
       std::cout << ": ";
       std::getline(std::cin, interpreter_prompt);
       if (!std::cin) {
-        throw "(error): broken input stream\n";
+        std::cerr << "(error): broken input stream\n";
         break;
       }
       if (temp_bracks == BF_SUCCESS_CODE_STANDARD) { env.wipe_instruction_buffer(true);  }
